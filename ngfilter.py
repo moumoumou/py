@@ -12,9 +12,10 @@ def string2ip(str):
     ss = string.split(str, '.');
     ip = 0L
     for s in ss: ip = (ip << 8) + string.atoi(s)
-    return ip;
+    return ip
  
 class IpLocater :
+    
     def __init__(self, ipdb_file):
         self.ipdb = open(ipdb_file, "rb")
         str = self.ipdb.read(8)
@@ -112,43 +113,69 @@ class IpLocater :
         return address 
         
 def queryIP(ipaddr, local_data = config.LOCAL_DATA):
-    ''' Return Locater Of target IP like 娴欐睙鐪佹澀宸炲競/鐢典俊 '''
+    ''' Return Locater Of target IP '''
     ip_locater = IpLocater(local_data)
     ip_locater.output(100, 200)
     addr = ip_locater.getIpAddr(string2ip(ipaddr))
     if platform.system() == "Linux":
         addr = unicode(addr, 'gbk').encode('utf-8')
     return addr
-
-def filterByLine(line, deny_rules = config.DENY_RULES):
+    
+def ruleFilter(line, filterlist):
     try:
-        f = open(log_path, 'r')
-        for line in f:
-            for rule in deny_rules:
-                counter = 0 
-                for kw in deny_rules[rule]['keyword']:
-                    if kw in line:
-                        counter += 1
-                if counter == len(deny_rules[rule]['keyword']):
-                    print line, 
-                        	
-        	'''
-            counter = 0
-    	    for value in filter_values:
-                if value in line:
-                    counter += 1
-            if counter == len(filter_values):  # matched
-            	pass
-                #print line
-            '''
+        counter = 0
+        for fter in filterlist:
+            if fter in line:
+                counter += 1
+        if counter == len(filterlist):
+            return line
+        else:
+            return 0
+                        
     except Exception, e:
         print e
+        
 
-
-if __name__ == "__main__" :
+def main():
     
     #ip = '122.224.137.162'
-    
     #print '%s %s' % (ip, queryIP(ip))
     
-    filterKeyWord()
+    resultdic = {}
+    '''
+        resultdic = {
+            'rule01':{'ip':1, 'ip':3}
+            'rule02':{'ip':2, 'ip':5}
+                ...
+        }
+    '''
+    
+    try:
+        with open(config.LOG_PATH, 'r') as f:
+            for line in f:
+                
+                for rule in config.DENY_RULES:
+                    
+                    if not rule in resultdic:
+                        resultdic[rule] = {}
+                       
+                    filterlist = config.DENY_RULES[rule]['filterlist']
+                    filtedline = ruleFilter(line, filterlist)
+                    if filtedline:
+                        filted_ip = filtedline.split()[0]
+                        if filted_ip in resultdic[rule]:
+                            resultdic[rule][filted_ip] += 1
+                        else:
+                            resultdic[rule][filted_ip] = 1
+        
+    except Exception, e:
+        print '%s: %s' % (e.__class__.__name__, e)
+        
+        
+    print resultdic
+        
+
+    
+if __name__ == "__main__" :
+    
+    main()

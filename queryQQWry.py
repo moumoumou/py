@@ -16,7 +16,7 @@ def string2ip( str ):
     ss = string.split(str, '.');
     ip = 0L
     for s in ss: ip = (ip << 8) + string.atoi(s)
-    return ip;
+    return ip
  
 class IpLocater :
     def __init__( self, ipdb_file ):
@@ -120,7 +120,7 @@ if __name__ == "__main__" :
     try:
         ip_locater = IpLocater('E:\Desktop\QQWry.Dat')
     except:
-        ip_locater = IpLocater('/root/QQWry.Dat')
+        ip_locater = IpLocater('./QQWry.Dat')
     ip_locater.output( 100, 120 )
     ip = '122.224.137.162'
     address = ip_locater.getIpAddr( string2ip( ip ) )
