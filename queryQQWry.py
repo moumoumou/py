@@ -3,6 +3,7 @@
 
 from struct import *
 import string
+import platform
 
 def ip2string( ip ):
     a = (ip & 0xff000000) >> 24
@@ -123,6 +124,11 @@ if __name__ == "__main__" :
     ip_locater.output( 100, 120 )
     ip = '122.224.137.162'
     address = ip_locater.getIpAddr( string2ip( ip ) )
-    #convert gbk to utf-8 in linux
-    address = unicode(address,'gbk').encode('utf-8')
+
+    if platform.system() == 'Linux':
+        #convert gbk to utf-8 in linux
+        address = unicode(address, 'gbk').encode('utf-8')
+    else:
+        address = address
+
     print "the ip %s come from %s" % (ip,address)
