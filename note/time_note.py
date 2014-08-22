@@ -1,6 +1,6 @@
 ﻿#!/bin/env python
 
-# time datetime test
+# time datetime note
 
 '''
 python中时间日期格式化符号：
@@ -31,10 +31,22 @@ python中时间日期格式化符号：
 
 '''
 
-import time, datetime
+import time
+import datetime
+
+########
+# time #
+########
 
 # -*- to struct_time format -*-
 #   time.struct_time(tm_year=2014, tm_mon=8, tm_mday=22, tm_hour=16, tm_min=18, tm_sec=44, tm_wday=4, tm_yday=234, tm_isdst=0)
+#   tm_wday ：Monday is 0
+#
+#   tm_isdst :
+#   If the DST flag is 0, the time is given in the regular time zone;
+#   if it is 1, the time is given in the DST time zone;
+#   if it is -1, mktime() should guess based on the date and time.
+#
 
 time.localtime()
 
@@ -46,13 +58,58 @@ btime = '19/Aug/2014:23:56:11'
 struct_time_a = time.strptime(atime, '%Y-%m-%d %H:%M:%S')
 struct_time_b = time.strptime(btime, '%d/%b/%Y:%H:%M:%S')
 
+
+
 # -*- to timestamp format -*-
 #   1317175200.0
 
-time.time()
-#   1408698121.328
+time.time()                                            # 1408698121.328
 
-time.mktime(struct_time_a)
+time.mktime(struct_time_a)                             # 1317175200.0
+
+
+time_a = time.time()
+time_b = time.mktime(time.localtime())
+time_c = time_b - time_a
+#print time_a
+#print time_b
+#print time_c
+
+
 
 # -*- format time -*-
-print time.strftime('%d/%b/%Y:%H:%M:%S', time.localtime())
+time.strftime('%d/%b/%Y:%H:%M:%S', time.localtime())   # 22/Aug/2014:21:20:10
+
+
+
+
+time.asctime()
+time.asctime(time.localtime())
+#   Convert a time tuple to a string, e.g. 'Sat Jun 06 16:26:11 1998'.
+#   When the time tuple is not present, current time as returned by localtime() is used.
+
+time.ctime()
+time.ctime(time.time())
+#   Convert a timestamp to a string, e.g. 'Fri Aug 22 21:42:15 2014'.
+#   When the timestamp is not present, current time as returned by time() is used.
+
+time.gmtime()
+#   Convert a timestamp to a struct_time format of UTC(0 timezone).
+#   e.g. time.struct_time(tm_year=2014, tm_mon=8, tm_mday=22, tm_hour=13, tm_min=54, tm_sec=10, tm_wday=4, tm_yday=234, tm_isdst=0)
+#   When the timestamp is not present, current time as returned by time() is used.
+
+time.clock()
+#   Use for performance testing
+
+time.sleep()
+#   Sleeping...
+
+
+
+
+
+
+
+############
+# datetime #
+############

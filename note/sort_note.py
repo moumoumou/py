@@ -1,3 +1,4 @@
+#!/bin/env python
 
 def bubbleSort(sortlist):
     for i in range(1, len(sortlist)):

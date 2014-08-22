@@ -56,6 +56,7 @@ class IpLocater :
             return self.getString(offset)
  
     def getAddr(self,offset ,ip = 0):
+        
         self.ipdb.seek(offset + 4)
  
         countryAddr = ""
@@ -85,6 +86,7 @@ class IpLocater :
     def output(self, first ,last):
         if last > self.index_count :
             last = self.index_count
+            
         for index in range(first,last):
             offset = self.first_index + index * 7
             self.ipdb.seek(offset)
@@ -220,9 +222,6 @@ def blackDictHandler(blackdict, deny_rules):
 
 def main():
     
-    #ip = '122.224.137.162'
-    #print '%s %s' % (ip, queryIP(ip))
-    
     ''' 
         if LOG_PATH exists alse sleep
         
@@ -242,7 +241,7 @@ def main():
         
 
     
-if __name__ == "__main__" :
+if __name__ == "__main__":
     
     main()
    
