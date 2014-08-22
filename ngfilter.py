@@ -1,5 +1,4 @@
 ﻿#!/bin/env python
-# coding utf-8
 
 import ngfilter_config as config
 import re
@@ -8,6 +7,7 @@ from struct import *
 import string
 import platform
  
+
 def string2ip(str):
     ss = string.split(str, '.');
     ip = 0L
@@ -114,12 +114,22 @@ class IpLocater :
         
 def queryIP(ipaddr, local_data = config.LOCAL_DATA):
     ''' Return Locater Of target IP '''
-    ip_locater = IpLocater(local_data)
-    ip_locater.output(100, 200)
-    addr = ip_locater.getIpAddr(string2ip(ipaddr))
-    if platform.system() == "Linux":
-        addr = unicode(addr, 'gbk').encode('utf-8')
-    return addr
+    try:
+        ip_locater = IpLocater(local_data)
+        ip_locater.output(100, 200)
+        addr = ip_locater.getIpAddr(string2ip(ipaddr))
+        if platform.system() == "Linux":
+            addr = unicode(addr, 'gbk').encode('utf-8')
+        return addr
+        
+    except UnicodeDecodeError:
+        return 'Unknow'
+        print '%s can not be queried' % ipaddr
+        
+    except Exception, e:
+        return 
+        print '%s : %s' % (e.__class__.__name__, e)
+    
     
 def ruleFilter(line, filterlist):
     try:
@@ -131,19 +141,16 @@ def ruleFilter(line, filterlist):
             return line
         else:
             return 0
-                        
+                                
     except Exception, e:
         print e
         
 
-def main():
+def getBlackDictByRule(logpath, deny_rules, whitelist):
     
-    #ip = '122.224.137.162'
-    #print '%s %s' % (ip, queryIP(ip))
-    
-    resultdic = {}
+    blackdic = {}
     '''
-        resultdic = {
+        blackdic = {
             'rule01':{'ip':1, 'ip':3}
             'rule02':{'ip':2, 'ip':5}
                 ...
@@ -151,31 +158,91 @@ def main():
     '''
     
     try:
-        with open(config.LOG_PATH, 'r') as f:
+        with open(logpath, 'r') as f:
             for line in f:
                 
-                for rule in config.DENY_RULES:
+                for rule in deny_rules:
                     
-                    if not rule in resultdic:
-                        resultdic[rule] = {}
+                    if not rule in blackdic:
+                        blackdic[rule] = {}
                        
-                    filterlist = config.DENY_RULES[rule]['filterlist']
+                    filterlist = deny_rules[rule]['filterlist']
                     filtedline = ruleFilter(line, filterlist)
                     if filtedline:
                         filted_ip = filtedline.split()[0]
-                        if filted_ip in resultdic[rule]:
-                            resultdic[rule][filted_ip] += 1
-                        else:
-                            resultdic[rule][filted_ip] = 1
+                        if not filted_ip in whitelist:
+                        
+                            if filted_ip in blackdic[rule]:
+                                blackdic[rule][filted_ip] += 1
+                            else:
+                                blackdic[rule][filted_ip] = 1
         
     except Exception, e:
         print '%s: %s' % (e.__class__.__name__, e)
         
+    return blackdic
+
+
+def detailLog(ip, area, freequency, area_filte, frequency_filte):
+    print 'deny %-20s # %-8d a=%d f=%d    %-50s' % (ip+';', freequency, area_filte, frequency_filte, area)
+
+
+def blackDictHandler(blackdict, deny_rules):
+    blacklist = []
+    for rule in deny_rules:
+        area = deny_rules[rule]['area'] # HANGZHOU
+        if area:
+            for ip in blackdict[rule]:
+                queried_ip = queryIP(ip)    ## debug
+                if queried_ip == area:
+                    if not deny_rules[rule]['frequency']:
+                        blacklist.append(ip)
+                        detailLog(ip, queried_ip, blackdict[rule][ip], 1, 0)
+                        
+                    elif blackdict[rule][ip] > deny_rules[rule]['frequency']:
+                        blacklist.append(ip)
+                        detailLog(ip, queried_ip, blackdict[rule][ip], 1, 1)
+                        
+        else:
+            for ip in blackdict[rule]:
+                                
+                if not deny_rules[rule]['frequency']:
+                    queried_ip = queryIP(ip)   ## debug
+                    blacklist.append(ip)
+                    detailLog(ip, queried_ip, blackdict[rule][ip], 0, 0)
+                    
+                elif blackdict[rule][ip] > deny_rules[rule]['frequency']:
+                    queried_ip = queryIP(ip)   ## debug
+                    blacklist.append(ip)
+                    detailLog(ip, queried_ip, blackdict[rule][ip], 0, 1)
+    
+    return blacklist
+
+def main():
+    
+    #ip = '122.224.137.162'
+    #print '%s %s' % (ip, queryIP(ip))
+    
+    ''' 
+        if LOG_PATH exists alse sleep
         
-    print resultdic
+        if ERROR_LOG PRO_BLACKLIST exists alse create
+    '''
+    # Time Format : 19/Aug/2014:23:56:11
+    #time_format = 
+    
+    logpath = config.LOG_PATH
+    deny_rules = config.DENY_RULES
+    whitelist = config.WHITELIST
+    
+    blackdict = getBlackDictByRule(logpath, deny_rules, whitelist)
+    
+    blacklist = blackDictHandler(blackdict, deny_rules)
+    #print blacklist
         
 
     
 if __name__ == "__main__" :
     
     main()
+   

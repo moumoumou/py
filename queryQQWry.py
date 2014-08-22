@@ -122,7 +122,7 @@ if __name__ == "__main__" :
     except:
         ip_locater = IpLocater('./QQWry.Dat')
     ip_locater.output( 100, 120 )
-    ip = '122.224.137.162'
+    ip = '124.115.77.251'
     address = ip_locater.getIpAddr( string2ip( ip ) )
 
     if platform.system() == 'Linux':
