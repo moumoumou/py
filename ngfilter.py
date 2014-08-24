@@ -6,6 +6,7 @@ import re
 from struct import *
 import string
 import platform
+import time
  
 
 def string2ip(str):
@@ -148,7 +149,7 @@ def ruleFilter(line, filterlist):
         print e
         
 
-def getBlackDictByRule(logpath, deny_rules, whitelist):
+def getBlackDictByRule(logpath, deny_rules, whitelist, time_filter):
     
     blackdic = {}
     '''
@@ -162,22 +163,22 @@ def getBlackDictByRule(logpath, deny_rules, whitelist):
     try:
         with open(logpath, 'r') as f:
             for line in f:
-                
-                for rule in deny_rules:
-                    
-                    if not rule in blackdic:
-                        blackdic[rule] = {}
-                       
-                    filterlist = deny_rules[rule]['filterlist']
-                    filtedline = ruleFilter(line, filterlist)
-                    if filtedline:
-                        filted_ip = filtedline.split()[0]
-                        if not filted_ip in whitelist:
+                if time_filter in line:
+                    for rule in deny_rules:
                         
-                            if filted_ip in blackdic[rule]:
-                                blackdic[rule][filted_ip] += 1
-                            else:
-                                blackdic[rule][filted_ip] = 1
+                        if not rule in blackdic:
+                            blackdic[rule] = {}
+                           
+                        filterlist = deny_rules[rule]['filterlist']
+                        filtedline = ruleFilter(line, filterlist)
+                        if filtedline:
+                            filted_ip = filtedline.split()[0]
+                            if not filted_ip in whitelist:
+                            
+                                if filted_ip in blackdic[rule]:
+                                    blackdic[rule][filted_ip] += 1
+                                else:
+                                    blackdic[rule][filted_ip] = 1
         
     except Exception, e:
         print '%s: %s' % (e.__class__.__name__, e)
@@ -220,6 +221,9 @@ def blackDictHandler(blackdict, deny_rules):
     
     return blacklist
 
+def getTimeFilter():
+    return time_filter
+
 def main():
     
     ''' 
@@ -233,8 +237,9 @@ def main():
     logpath = config.LOG_PATH
     deny_rules = config.DENY_RULES
     whitelist = config.WHITELIST
+    time_filter = '20/Aug/2014:21:'
     
-    blackdict = getBlackDictByRule(logpath, deny_rules, whitelist)
+    blackdict = getBlackDictByRule(logpath, deny_rules, whitelist, time_filter)
     
     blacklist = blackDictHandler(blackdict, deny_rules)
     #print blacklist
