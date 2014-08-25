@@ -127,7 +127,6 @@ def queryIP(ipaddr, local_data = config.LOCAL_DATA):
         
     except UnicodeDecodeError:
         return 'Unknow'
-        print '%s can not be queried' % ipaddr
         
     except Exception, e:
         return 

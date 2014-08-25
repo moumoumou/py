@@ -101,7 +101,7 @@ time.gmtime()
 time.clock()
 #   Use for performance testing
 
-time.sleep()
+time.sleep(0.1)
 #   Sleeping...
 
 
@@ -113,3 +113,42 @@ time.sleep()
 ############
 # datetime #
 ############
+
+datetime.datetime.now()
+#   2014-08-25 14:05:44.299609
+#
+#   datetime.datetime.now()
+#   datetime.datetime(2014, 8, 25, 14, 6, 13, 497000)
+#
+#   type(datetime.datetime.now())
+#   <type 'datetime.datetime'>
+
+
+
+d1 = datetime.datetime(2014, 4, 6)
+#   2014-04-06 00:00:00
+d2 = datetime.datetime(2014, 8, 13)
+#   2014-08-13 00:00:00
+d_delta = (d2 - d1)
+
+d_delta
+#   129 days, 0:00:0
+d_delta.days
+#   129
+
+d3 = datetime.datetime.now()
+#time.sleep(2)
+d4 = datetime.datetime.now()
+d_delta = (d4 - d3)
+
+d_delta
+#   0:00:02.003264
+d_delta.seconds
+#   2
+
+
+d5 = datetime.datetime.now()
+d6 = d5 - datetime.timedelta(minutes = 2)
+d7 = d5 + datetime.timedelta(hours = 3)
+
+d7.ctime()

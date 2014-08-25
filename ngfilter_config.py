@@ -14,10 +14,10 @@ INTERVAL = 600
 # 124.115.77.251  陕西省渭南市临渭区/电信
 DENY_RULES = {
         'rule01':{'filterlist':['124.115.77.251'], 'area':'陕西省渭南市临渭区/电信', 'frequency':1},
-        'rule02':{'filterlist':['Android','40000002'], 'area':'', 'frequency':0}, 
+        'rule02':{'filterlist':['Android','40000002'], 'area':'', 'frequency':1}, 
 }
 
 # deny ip;
-PRO_BLACKLIST = '' 
+BLACKLIST_PATH = '' 
 
-ERROR_LOG = ''
+ERRORLOG_PATH = ''
