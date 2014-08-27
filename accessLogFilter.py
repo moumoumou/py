@@ -1,6 +1,6 @@
 ﻿#!/bin/env python
 
-import ngfilter_config as config
+import accessLogFilter_config as config
 import re
 
 from struct import *

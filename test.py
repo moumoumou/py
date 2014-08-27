@@ -1,41 +1,63 @@
 ﻿#!/bin/env python
 
-#   115.236.77.194
-
-import ping
+from random import randint
 from time import sleep
+from ping import quiet_ping
+import Queue
+import threading
 
-print ping.do_one('61.147.72.236', 2, 64)
-sleep(2)
-print ping.quiet_ping('61.147.72.236')
+def putQueue(queue, qsize):
+    for i in range(qsize):
+        queue.put(i)
+    return queue
 
+def getQueue(queue, tname):
+    while True:
+        sleep(randint(1,2))
+        if not queue.empty():
+            print 'Thread-%s  %d' % (tname, queue.get())
+        else:
+            break
 
+def createIP():
+    ip_part1 = str(randint(1,126))
+    ip_part2 = str(randint(0,255))
+    ip_part3 = str(randint(0,255))
+    ip_part4 = str(randint(0,255))
+    return '%s.%s.%s.%s' % (ip_part1, ip_part2, ip_part3, ip_part4)  
 
+def quietPing(ip_queue, nthread):
+    while True:
+        try:
+            if not ip_queue.empty():
+                ipaddr = ip_queue.get()
+                print 'Thread-%-2s %-18s %s' % (nthread, ipaddr, quiet_ping(ipaddr))
+            else:
+                break
+        except:
+            print 'exception'
 
-'''
+def main():
+    
+    ip_queue = Queue.Queue(100)
+    
+    for i in range(100):
+        ip_queue.put(createIP())
+        
+    #putQueue(queue, 12)
+    #getQueue(queue)
+    threads = []
+    
+    for i in range(3):
+        th = threading.Thread(target=quietPing, args=(ip_queue, str(i)))
+        threads.append(th)
+        
+    for i in range(3):
+        threads[i].start()
+        
+    for i in range(3):
+        threads[i].join()
 
-FUNCTIONS
-    checksum(source_string)
-        I'm not too confident that this is right but testing seems
-        to suggest that it gives the same answers as in_cksum in ping.c
-
-    do_one(dest_addr, timeout, psize)
-        Returns either the delay (in seconds) or none on timeout.
-
-    quiet_ping(dest_addr, timeout=2, count=4, psize=64)
-        Send `count' ping with `psize' size to `dest_addr' with
-        the given `timeout' and display the result.
-        Returns `percent' lost packages, `max' round trip time
-        and `avrg' round trip time.
-
-    receive_one_ping(my_socket, id, timeout)
-        Receive the ping from the socket.
-
-    send_one_ping(my_socket, dest_addr, id, psize)
-        Send one ping to the given >dest_addr<.
-
-    verbose_ping(dest_addr, timeout=2, count=4, psize=64)
-        Send `count' ping with `psize' size to `dest_addr' with
-        the given `timeout' and display the result.
-
-'''
+if __name__ == '__main__':
+    
+    main()
