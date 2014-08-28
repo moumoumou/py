@@ -75,7 +75,7 @@ def main():
     
     threads = []
     
-    for i in range(1):
+    for i in range(5):
         th = threading.Thread(target=quietPing, args=(ip_queue, str(i)))
         threads.append(th)
         
