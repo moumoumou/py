@@ -11,9 +11,10 @@ def lstdir(path):
             fp = os.path.join(path, file)
     
             if not os.path.isdir(fp):
-                allfile.append(fp)
-            else:
                 #allfile.append(fp)
+                pass
+            else:
+                allfile.append(fp)
                 lstdir(fp)
 
     return allfile
@@ -21,6 +22,7 @@ def lstdir(path):
 
 if __name__ == '__main__':
     
-    allfile = lstdir('/home')
+    root_path = '/home/samba/workspace/tigase-server'
+    allfile = lstdir(root_path)
     for file in allfile:
-        print file
+        print file[len(root_path):]
