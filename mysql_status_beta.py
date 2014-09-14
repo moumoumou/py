@@ -88,7 +88,7 @@ def viewOutput(dic, table_space_list, tag):
 
 def main():
     
-    host    = '192.168.100.34'
+    host    = '192.168.100.35'
     port    = 3306
     user    = 'sa_zhuj'
     passwd  = 'tshowzhuj'

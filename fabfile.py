@@ -13,10 +13,15 @@ env.roledefs = {
 						't0.kktv8.com:61022',
 					   	't1.kktv8.com:61022',
 					   	't2.kktv8.com:61022'
-				   	  ]
+				   	  ],
+            'vm': [
+                    'vm1',
+                    'vm2',
+                    'vm3'
+                  ]
 			}
 
-env.password = ''
+env.password = 'helloworld'
 
 
 def runshell(command):
@@ -32,6 +37,9 @@ def sed():
 	run("sed -i s'/10/2/' %s" % path2file)
 	run("sed -i s'/53/59/' %s" % path2file)
 	run('cat %s' % path2file)
+
+def fabput():
+    put('/etc/snmp/snmpd.conf', '/etc/snmp/')
 
 '''
 def passwd():
