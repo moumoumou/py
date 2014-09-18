@@ -8,6 +8,7 @@
 
 import MySQLdb
 from time import sleep
+import sys
 
 def conn2mysql(host, port, user, passwd, charset):
     try:
@@ -88,7 +89,11 @@ def viewOutput(dic, table_space_list, tag):
 
 def main():
     
-    host    = '192.168.100.35'
+    try:
+        host = sys.argv[1]
+    except:
+        print '''USAGE: python2.7 script.py host \nDEFAULT 192.158.100.34'''
+        host = '192.168.100.34'
     port    = 3306
     user    = 'sa_zhuj'
     passwd  = 'tshowzhuj'

@@ -3,8 +3,19 @@
 import psycopg2
 import string
 import sys
+import time
 import multiprocessing
 from random import randint
+
+def exeTime(func):  
+    def newFunc(*args, **args2):  
+        t0 = time.time()  
+        #print "@%s, {%s} start" % (time.strftime("%X", time.localtime()), func.__name__)  
+        back = func(*args, **args2)  
+        #print "@%s, {%s} end" % (time.strftime("%X", time.localtime()), func.__name__)  
+        print "%.3fs [%s]" % (time.time() - t0, func.__name__)  
+        return back  
+    return newFunc
 
 def conn2pg(host, port, user, password, database):
     try:
@@ -24,19 +35,19 @@ def runSQL(conn, sql):
         cur = conn.cursor()
         result = cur.execute(sql)
         conn.commit()
-        return result
+        return 1
     except Exception, e:
         print 'Execute failed\n %s' % e
 
-    
+@exeTime
 def batchInsertData(conn, tbl_name ,nrow):
+    '''Batch insert as a transaction'''
     try:
         cur = conn.cursor()
         for i in range(nrow):
-            #value_tuple = (randStr(10, 30), randStr(10, 20), randStr(10, 20), randStr(10, 20), randStr(10, 30), randStr(10, 30))
             sql = "insert into %s(uid, a, b) values(0, 'aaaaacccccaaaaaaaaafffffffff', 'dddddddddaaaaabddddsssss')" % tbl_name
             cur.execute(sql)
-            conn.commit()
+        conn.commit()
             
     except Exception, e:
         print 'Batch insert failed\n %s' %e
@@ -68,25 +79,29 @@ class SQList():
         self.sql_18 = 'DELETE from %s where id = %d' % (tbl_name, tmp_id)
         self.sql_19 = "INSERT INTO %s values(%d, 0, 'only for test take it easy', 'aaaaaafffffadeeeeeeeeefadfsdddddyyyyyyyyyyyyyy')" % (tbl_name, tmp_id)
 
-def runTrans(conn, ran_low, ran_top):
-    while True:
-        trans_sql_dict = SQList('stress_test', ran_low, ran_top).__dict__  
-        cur = conn.cursor()
-        trans_sql_key_list = trans_sql_dict.keys()
-        trans_sql_key_list.sort()
-        for key in trans_sql_key_list:
-            #print trans_sql_dict[key]
-            cur.execute(trans_sql_dict[key])
-            conn.commit()
+def runTrans(conn, ran_low, ran_top, process_num):
+    try:
+        while True:
+            trans_sql_dict = SQList('stress_test', ran_low, ran_top).__dict__  
+            cur = conn.cursor()
+            trans_sql_key_list = trans_sql_dict.keys()
+            trans_sql_key_list.sort()
+            for key in trans_sql_key_list:
+                #print trans_sql_dict[key]
+                cur.execute(trans_sql_dict[key])
+                conn.commit()
+        conn.close()
+    except KeyboardInterrupt:
+        print 'Porcess-%d Stopped' % process_num
     
 
 def main():
     
-    host = '10.0.0.82'
+    host = '10.0.3.107'
     port = 5432
     user = 'postgres'
-    password = '123456'
-    database = 'mydb'
+    password = 'helloworld'
+    database = 'example'
     #db_name = 'test'
     tbl_name = 'stress_test'
     
@@ -95,12 +110,13 @@ def main():
     sql_create_tbl = '''
                 CREATE TABLE IF NOT EXISTS %s
                 (
-                    id serial NOT NULL, 
+                    id serial NOT NULL PRIMARY KEY,
                     uid int NOT NULL DEFAULT 0,
                     a varchar(50), 
                     b varchar(50)
                 )
                 ''' % tbl_name
+    sql_create_index = 'CREATE INDEX stress_test_index01 ON %s (id)' % tbl_name
                         
     sql_truncate_tbl = 'TRUNCATE TABLE %s' % tbl_name
     sql_setval = "select setval('%s_id_seq', 1, false)" % tbl_name
@@ -109,7 +125,11 @@ def main():
         if sys.argv[1] == 'create':
             conn = conn2pg(host, port, user, password, database)
             if runSQL(conn, sql_create_tbl):
-                print 'Created'
+                print 'Table Created'
+            '''
+            if runSQL(conn, sql_create_index):
+                print 'Index Created'
+            '''
             conn.close()
         
         elif sys.argv[1] == 'insert':
@@ -124,10 +144,12 @@ def main():
             pr_pool = []
             for i in range(num_proc):
                 conn = conn2pg(host, port, user, password, database)
-                pr = multiprocessing.Process(target = runTrans, args=(conn, ran_low, ran_top))
+                pr = multiprocessing.Process(target = runTrans, args=(conn, ran_low, ran_top, i))
                 pr_pool.append(pr)
             for i in range(num_proc):
                 pr_pool[i].start()
+            for i in range(num_proc):
+                pr_pool[i].join()
             
             
             #runTrans(conn, ran_low, ran_top)
@@ -135,12 +157,12 @@ def main():
         elif sys.argv[1] == 'drop':
             conn = conn2pg(host, port, user, password, database)
             if runSQL(conn, 'DROP table %s' % tbl_name):
-                print 'Dropped'
+                print 'Table Dropped'
             conn.close()
            
            
     except IndexError:
-        print '''Use like
+        print '''Usage like
         script create
         script insert 10000
         script run 10000 10(threads)
