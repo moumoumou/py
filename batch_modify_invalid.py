@@ -46,12 +46,15 @@ def main():
     db = 'tigasedb'
     inva_list = ['>','<','"','\\\'','&']
     
-    select_sql = r'''SELECT room_name FROM tig_muc_room WHERE room_name LIKE '%>%' OR room_name LIKE '%<%' OR room_name LIKE '%&%' OR room_name LIKE '%\'%' OR room_name LIKE '%"%';'''
-    update_sql = "UPDATE tig_muc_room SET room_name='%s' WHERE room_name='%s';"
-    
+    select_sql = r'''SELECT room_name FROM tig_muc_room WHERE room_name LIKE '%>%' OR room_name LIKE '%<%' OR room_name LIKE '%&%' OR room_name LIKE '%\'%' OR room_name LIKE '%"%' ;'''
+    update_sql_fmt = "UPDATE tig_muc_room SET room_name='%s' WHERE room_name='%s';"
+    select_sql2 = r'''SELECT room_desc FROM tig_muc_room WHERE room_name LIKE '%>%' OR room_name LIKE '%<%' OR room_name LIKE '%&%' OR room_name LIKE '%\'%' OR room_name LIKE '%"%' ;'''
+    update_sql_fmt2 = "UPDATE tig_muc_room SET room_desc='%s' WHERE room_desc='%s';"
     conn = conn2mysql(host, user, passwd, db)
     if conn:
-        handler(conn, select_sql, update_sql, inva_list) 
+        handler(conn, select_sql, update_sql_fmt, inva_list) 
+        print '##====================================='
+        handler(conn, select_sql2, update_sql_fmt2, inva_list)
         conn.close()
     
 if __name__ == '__main__':

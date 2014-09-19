@@ -79,8 +79,10 @@ class SQList():
         self.sql_18 = 'DELETE from %s where id = %d' % (tbl_name, tmp_id)
         self.sql_19 = "INSERT INTO %s values(%d, 0, 'only for test take it easy', 'aaaaaafffffadeeeeeeeeefadfsdddddyyyyyyyyyyyyyy')" % (tbl_name, tmp_id)
 
+@exeTime
 def runTrans(conn, ran_low, ran_top, process_num):
     try:
+        counter = 0
         while True:
             trans_sql_dict = SQList('stress_test', ran_low, ran_top).__dict__  
             cur = conn.cursor()
@@ -90,9 +92,11 @@ def runTrans(conn, ran_low, ran_top, process_num):
                 #print trans_sql_dict[key]
                 cur.execute(trans_sql_dict[key])
                 conn.commit()
-        conn.close()
+                counter += 1
     except KeyboardInterrupt:
-        print 'Porcess-%d Stopped' % process_num
+        print 'Porcess-%d Stopped [%d committed]' % (process_num, counter)
+    finally:
+        conn.close()
     
 
 def main():
