@@ -30,7 +30,7 @@ def main():
         hostlist = ['115.236.77.194', '115.236.77.197', '115.236.77.198']
         port = 61022
         password = sys.argv[1]
-        username = 'root'
+        username = 'zhuj'
         cmd1 = ''' netstat -antp | awk '$4 ~ ":5222" && $6 !~ "LISTEN" {++S[$6]}END{for(a in S) print a,S[a]}' '''
         cmd2 = 'cat /proc/loadavg'
     
